@@ -45,6 +45,6 @@ func (handler *UrlShortentherHandler) GetOriginal(c *gin.Context) {
 		url.OriginalUrl = val
 	}
 	url.ShortenUrl = shortenUrl
-
+	logger.Info(url)
 	c.JSON(http.StatusOK, url)
 }
