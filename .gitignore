@@ -22,3 +22,6 @@ test/
 
 *main
 dump.rdb
+
+postgres-data/
+redis-data/
