@@ -2,7 +2,6 @@ package main
 
 import (
 	"net/http"
-	"os"
 	"ratelimiter/UrlShorten"
 	"ratelimiter/util"
 
@@ -21,8 +20,8 @@ func main() {
 	})
 
 	UrlShorten.ApiEndpoints(r)
-	port := os.Getenv("PORT")
-
-	log.Info(port)
-	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	settings := util.GetSettings()
+	log.Info("Basic settings")
+	log.Info(settings)
+	r.Run()
 }

@@ -18,3 +18,6 @@ run-local-race:
 
 run-server:
 	docker-compose up -d
+
+reload:
+	docker-compose down && docker-compose up -d

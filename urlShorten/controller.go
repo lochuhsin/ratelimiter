@@ -30,46 +30,59 @@ func ApiEndpoints(r *gin.Engine) {
 	routes.POST("/", h.CreateUrl)
 
 }
-
+// TODO: add validator, store data to postgres, add rate limit default policy
 func (handler *UrlShortentherHandler) CreateUrl(c *gin.Context) {
-
+	settings := util.GetSettings()
 	url := Url{}
 	if c.BindJSON(&url) == nil {
 		logger.Info(c)
 	}
-	logger.Info(url)
-
-	rawHashUrl := UrlHasher(url.OriginalUrl)
-	// get first seven, as seven is a magic number, will discuss specifically
-	rawHashUrl = rawHashUrl[:7]
-	// 1. check if rawHashUrl is in redis && database else store in redis and db
+	originalUrl := url.OriginalUrl
+	hashUrl := ""
 	rehashCount := 0
-
-	if !handler.urlCache.Exist(rawHashUrl){
-		handler.urlCache.Add(rawHashUrl, url.OriginalUrl)
-		handler.rehashCounter.Add(rawHashUrl, rehashCount)
-		url.ShortenUrl = rawHashUrl
+	for {
+		hashUrl = UrlHasher(originalUrl)
+		if !handler.urlCache.Exist(hashUrl){
+			break
+		}
+		originalUrl += settings.PredefineString
+		rehashCount ++
 	}
 
-
-	// 2. if so add predefined string and rehash once, add counter by one to restore original url
-
-	// 3. store everything in redis (expire time) and postgres
-
-	// 4. Add default rate limit policy for this url (maybe in elasticsearch)
-
+	err := handler.urlCache.Add(hashUrl, originalUrl)
+	if err != nil{
+		panic(err)
+	}
+	err = handler.rehashCounter.Add(hashUrl, rehashCount)
+	if err != nil{
+		panic(err)
+	}
+	url.ShortenUrl = hashUrl
 	c.JSON(http.StatusOK, url)
 }
 
+// TODO: fix this c.JSON using struct to bind values
 func (handler *UrlShortentherHandler) GetOriginal(c *gin.Context) {
 	shortenUrl := c.DefaultQuery("shortenUrl", "")
-	mapper := GetMapperInstance()
-	url := Url{}
-
-	if val, status := mapper.Get(shortenUrl); status {
-		url.OriginalUrl = val
+	settings := util.GetSettings()
+	if len(shortenUrl) == 0{
+		c.JSON(http.StatusOK, "")
 	}
-	url.ShortenUrl = shortenUrl
-	logger.Info(url)
-	c.JSON(http.StatusOK, url)
+
+	if !handler.urlCache.Exist(shortenUrl){
+		c.JSON(http.StatusBadRequest, "")
+	}
+
+	hashedUrl, err := handler.urlCache.Get(shortenUrl)
+	if err != nil{
+		panic(err)
+	}
+
+	count, err := handler.rehashCounter.Get(shortenUrl)
+	if err != nil{
+		panic(err)
+	}
+
+	upperBound := len(hashedUrl) - len(settings.PredefineString)*count
+	c.JSON(http.StatusOK, string(hashedUrl[:upperBound]))
 }

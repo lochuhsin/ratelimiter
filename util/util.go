@@ -1,6 +1,8 @@
 package util
 
 import (
+	"os"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -14,4 +16,20 @@ func GetLogger(packageLocation string) *logrus.Logger {
 		"PackageLocation": packageLocation,
 	})
 	return log
+}
+
+type Settings struct {
+	RedisPort       string
+	PostgresPort    string
+	PredefineString string
+	Port            string
+}
+
+func GetSettings() Settings {
+	return Settings{
+		Port:            os.Getenv("PORT"),
+		RedisPort:       os.Getenv("REDIS_PORT"),
+		PostgresPort:    os.Getenv("POSTGRES_PORT"),
+		PredefineString: os.Getenv("PREDEFINE_STRING"),
+	}
 }
