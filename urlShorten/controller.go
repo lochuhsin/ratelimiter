@@ -62,6 +62,7 @@ func (handler *UrlShortentherHandler) CreateUrl(c *gin.Context) {
 }
 
 // TODO: fix this c.JSON using struct to bind values
+// fix url return with redundant "" -> """yahoo.com"
 func (handler *UrlShortentherHandler) GetOriginal(c *gin.Context) {
 	shortenUrl := c.DefaultQuery("shortenUrl", "")
 	settings := util.GetSettings()
