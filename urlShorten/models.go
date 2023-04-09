@@ -1,4 +1,4 @@
-package ratelimit
+package UrlShorten
 
 type Url struct {
 	OriginalUrl string

@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 	"os"
-	"ratelimiter/ratelimit"
+	"ratelimiter/UrlShorten"
 	"ratelimiter/util"
 
 	"github.com/gin-gonic/gin"
@@ -20,7 +20,7 @@ func main() {
 		})
 	})
 
-	ratelimit.ApiEndpoints(r)
+	UrlShorten.ApiEndpoints(r)
 	port := os.Getenv("PORT")
 
 	log.Info(port)

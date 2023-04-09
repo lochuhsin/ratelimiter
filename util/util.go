@@ -1,6 +1,8 @@
 package util
 
-import "github.com/sirupsen/logrus"
+import (
+	"github.com/sirupsen/logrus"
+)
 
 func GetLogger(packageLocation string) *logrus.Logger {
 	log := logrus.New()

@@ -15,3 +15,6 @@ test-local:
 
 run-local-race:
 	go build -race cmd/main.go && ./main
+
+run-server:
+	docker-compose up -d
